@@ -1,0 +1,54 @@
+{
+    "name": "singlephon/hotification",
+    "description": "Easy configurable event-based Laravel notification package.",
+    "keywords": [
+        "singlephon",
+        "hotification",
+        "notification"
+    ],
+    "homepage": "https://github.com/singlephon/hotification",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Rakhat Bakytzhanov",
+            "email": "singlephon@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Singlephon\\Hotification\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Singlephon\\Hotification\\HotificationServiceProvider"
+            ],
+            "aliases": {
+                "Hotification": "Singlephon\\Hotification\\HotificationFacade"
+            }
+        }
+    }
+}

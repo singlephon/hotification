@@ -5,7 +5,6 @@ namespace Singlephon\Hotification\Observers;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Singlephon\Hotification\Extras\HotificationManager;
-use Singlephon\Hotification\Hotification;
 use Singlephon\Hotification\Notifications\AbstractHotification;
 use Throwable;
 

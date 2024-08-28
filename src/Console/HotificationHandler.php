@@ -3,7 +3,6 @@
 namespace Singlephon\Hotification\Console;
 
 use Illuminate\Console\Command;
-use Modules\Central\Models\Tenant;
 use Modules\System\Models\Notification;
 
 class HotificationHandler extends Command

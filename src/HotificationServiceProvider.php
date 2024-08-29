@@ -9,7 +9,9 @@ use Illuminate\Support\ServiceProvider;
 use Singlephon\Hotification\Console\HotificationHandler;
 use Singlephon\Hotification\Console\Installer;
 use Singlephon\Hotification\Extras\HotificationManager;
+use Singlephon\Hotification\Notifications\AbstractHotification;
 use Singlephon\Hotification\Observers\HotificationObserver;
+use Singlephon\Hotification\Trackers\ObserverTracker;
 
 class HotificationServiceProvider extends ServiceProvider
 {
@@ -21,21 +23,11 @@ class HotificationServiceProvider extends ServiceProvider
 
         foreach ($modelArray as $modelClass => $events) {
             /** @var Model $modelClass */
+            if (ObserverTracker::hasObserver($modelClass, HotificationObserver::class))
+                continue;
+
             $modelClass::observe(HotificationObserver::class);
-        }
-    }
-
-    /**
-     * @throws BindingResolutionException
-     */
-    protected function registerObservers(): void
-    {
-        // Получаем экземпляр HotificationManager из контейнера
-        $hotificationManager = new HotificationManager();
-
-        // Регистрируем наблюдатель для модели, используя контейнер
-        foreach (config('hotification.models', []) as $model) {
-            $model::observe(HotificationObserver::class);
+            ObserverTracker::addObserver($modelClass, HotificationObserver::class);
         }
     }
 
@@ -46,7 +38,7 @@ class HotificationServiceProvider extends ServiceProvider
         foreach ($notifications as $name => $notificationConfig) {
             if (is_callable($notificationConfig)) {
 
-                $notificationConfig($schedule);
+                call_user_func($notificationConfig, $schedule);
             } elseif (is_array($notificationConfig)) {
 
                 $events = $notificationConfig['events'] ?? [];
@@ -68,9 +60,23 @@ class HotificationServiceProvider extends ServiceProvider
         }
     }
 
-    protected function sendScheduledNotification($notification)
+    protected function sendScheduledNotification($notification): void
     {
+        if ($notification instanceof AbstractHotification) {
+            $receivers = $notification->receivers();
 
+            if ($receivers instanceof \Illuminate\Database\Eloquent\Model) {
+                $receivers = collect([$receivers]);
+            } elseif (is_array($receivers)) {
+                $receivers = collect($receivers);
+            }
+
+            foreach ($receivers as $receiver) {
+                $receiver->notify($notification);
+            }
+        } else {
+            throw new \Exception('Given ' .  $notification::class . ' must extend AbstractHotification.');
+        }
     }
 
     /**
@@ -95,7 +101,6 @@ class HotificationServiceProvider extends ServiceProvider
             });
         }
         $this->observers();
-//        $this->registerObservers();
     }
 
     /**

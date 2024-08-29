@@ -67,7 +67,6 @@ In `Hotification`, you can use model observers to automatically perform actions 
 Key settings in `config/hotification.php`:
 
 ```php
-phpКопировать код
 'models' => [
     # Models for which observers need to be registered
 ],

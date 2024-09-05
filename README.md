@@ -45,7 +45,6 @@ Add the provider, alias to the `config/app.php`:
 Use the `HotificationSender` class for instant sending of notifications to the database:
 
 ```php
-use Singlephon\Hotification\Extras\HotificationSender;
 use App\Models\User;
 
 (new Hotification())

@@ -1,0 +1,11 @@
+<?php
+
+namespace App\Hotification;
+
+class Schedules
+{
+    public function setup(): array
+    {
+        return [];
+    }
+}

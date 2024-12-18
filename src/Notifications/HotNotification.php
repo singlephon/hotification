@@ -10,9 +10,13 @@ class HotNotification extends Notification
     use Queueable;
 
     protected string $icon;
+
     protected ?string $title;
+
     protected ?string $description;
+
     protected ?string $url;
+
     protected bool $actionable;
 
     public function __construct(string $icon, ?string $title, ?string $description, ?string $url, bool $actionable)

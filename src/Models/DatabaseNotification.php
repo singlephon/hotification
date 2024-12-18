@@ -11,8 +11,8 @@ use Illuminate\Notifications\DatabaseNotification as BaseNotification;
 
 class DatabaseNotification extends BaseNotification
 {
-    use Prunable;
     use HasUuids;
+    use Prunable;
 
     protected $table = 'notifications';
 

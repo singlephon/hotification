@@ -9,10 +9,15 @@ use Singlephon\Hotification\Interfaces\HotificationSenderInterface;
 class HotificationSender implements HotificationSenderInterface
 {
     protected string $icon = 'default';
+
     protected ?string $title = null;
+
     protected ?string $description = null;
+
     protected ?string $url = null;
+
     protected bool $actionable = false;
+
     protected $receivers;
 
     public function to(Model|Collection|array $receivers): self
@@ -24,36 +29,42 @@ class HotificationSender implements HotificationSenderInterface
         }
 
         $this->receivers = $receivers;
+
         return $this;
     }
 
     public function icon(string $icon): self
     {
         $this->icon = $icon;
+
         return $this;
     }
 
     public function title(string $title): self
     {
         $this->title = $title;
+
         return $this;
     }
 
     public function description(string $description): self
     {
         $this->description = $description;
+
         return $this;
     }
 
     public function url(string $url): self
     {
         $this->url = $url;
+
         return $this;
     }
 
     public function actionable(bool $actionable = true): self
     {
         $this->actionable = $actionable;
+
         return $this;
     }
 

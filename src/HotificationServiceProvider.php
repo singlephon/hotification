@@ -8,23 +8,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Singlephon\Hotification\Console\HotificationHandler;
 use Singlephon\Hotification\Console\Installer;
-use Singlephon\Hotification\Extras\HotificationManager;
 use Singlephon\Hotification\Notifications\AbstractHotification;
 use Singlephon\Hotification\Observers\HotificationObserver;
 use Singlephon\Hotification\Trackers\ObserverTracker;
 
 class HotificationServiceProvider extends ServiceProvider
 {
-
-
     public function observers(): void
     {
-        $modelArray = config('hotification.models');
+        $modelsConfigClass = config('hotification.models');
+        $modelObject = new $modelsConfigClass;
+        $modelArray = $modelObject->observers();
 
         foreach ($modelArray as $modelClass => $events) {
             /** @var Model $modelClass */
-            if (ObserverTracker::hasObserver($modelClass, HotificationObserver::class))
+            if (ObserverTracker::hasObserver($modelClass, HotificationObserver::class)) {
                 continue;
+            }
 
             $modelClass::observe(HotificationObserver::class);
             ObserverTracker::addObserver($modelClass, HotificationObserver::class);
@@ -33,7 +33,9 @@ class HotificationServiceProvider extends ServiceProvider
 
     public function scheduledNotifications(Schedule $schedule): void
     {
-        $notifications = config('hotification.scheduled_notifications');
+        $scheduledConfigClass = config('hotification.scheduled_notifications');
+        $scheduleObject = new $scheduledConfigClass;
+        $notifications = $scheduleObject->setup();
 
         foreach ($notifications as $name => $notificationConfig) {
             if (is_callable($notificationConfig)) {
@@ -50,7 +52,7 @@ class HotificationServiceProvider extends ServiceProvider
                             if (is_callable($event)) {
                                 call_user_func($event);
                             } elseif (class_exists($event)) {
-                                $notification = new $event();
+                                $notification = new $event;
                                 $this->sendScheduledNotification($notification);
                             }
                         }
@@ -75,12 +77,13 @@ class HotificationServiceProvider extends ServiceProvider
                 $receiver->notify($notification);
             }
         } else {
-            throw new \Exception('Given ' .  $notification::class . ' must extend AbstractHotification.');
+            throw new \Exception('Given '.$notification::class.' must extend AbstractHotification.');
         }
     }
 
     /**
      * Bootstrap the application services.
+     *
      * @throws BindingResolutionException
      */
     public function boot()
@@ -92,7 +95,7 @@ class HotificationServiceProvider extends ServiceProvider
 
             $this->commands([
                 Installer::class,
-                HotificationHandler::class
+                HotificationHandler::class,
             ]);
 
             $this->app->booted(function () {
@@ -105,6 +108,7 @@ class HotificationServiceProvider extends ServiceProvider
 
     /**
      * Register the application services.
+     *
      * @throws BindingResolutionException
      */
     public function register()
@@ -123,7 +127,7 @@ class HotificationServiceProvider extends ServiceProvider
      */
     private function mergeLoggingChannels(): void
     {
-        $packageLoggingConfig = require __DIR__ . '/../config/logging.php';
+        $packageLoggingConfig = require __DIR__.'/../config/logging.php';
 
         $config = $this->app->make('config');
 

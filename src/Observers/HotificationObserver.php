@@ -52,7 +52,7 @@ class HotificationObserver
                         $this->sendNotification($notification);
                     }
                 } catch (Throwable $e) {
-                    Log::channel('hotification')->error("Error while sending notification to {$modelClass} for {$event} event: " . $e->getMessage(), [
+                    Log::channel('hotification')->error("Error while sending notification to {$modelClass} for {$event} event: ".$e->getMessage(), [
                         'model' => $modelClass,
                         'event' => $event,
                     ]);
@@ -79,7 +79,7 @@ class HotificationObserver
                 $receiver->notify($notification);
             }
         } else {
-            throw new \Exception('Given ' .  $notification::class . ' must extend AbstractHotification.');
+            throw new \Exception('Given '.$notification::class.' must extend AbstractHotification.');
         }
     }
 }

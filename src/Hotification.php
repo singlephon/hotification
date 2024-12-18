@@ -10,19 +10,15 @@ use Singlephon\Hotification\Interfaces\HotificationSenderInterface;
 
 class Hotification
 {
-    /**
-     * @param Model|Collection $receivers
-     * @return HotificationSenderInterface|HotificationSender
-     */
     public function notify(Model|Collection $receivers): HotificationSenderInterface|HotificationSender
     {
         $senderClass = config('hotification.extras.hotification_sender');
 
-        return (new $senderClass())->to($receivers);
+        return (new $senderClass)->to($receivers);
     }
 
     public function manager(): HotificationManager
     {
-        return new HotificationManager();
+        return new HotificationManager;
     }
 }

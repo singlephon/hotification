@@ -2,7 +2,6 @@
 
 namespace Singlephon\Hotification\Extras;
 
-use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Singlephon\Hotification\Observers\HotificationObserver;
 use Singlephon\Hotification\Trackers\ObserverTracker;
@@ -18,23 +17,26 @@ class HotificationManager
         self::$dynamicNotifications[$model] = [
             'onCreated' => $onCreated,
             'onUpdated' => $onUpdated,
-            'onDeleted' => $onDeleted
+            'onDeleted' => $onDeleted,
         ];
 
         self::$dynamicNotifications = array_merge_recursive(self::$dynamicNotifications, $previousNotificationState);
 
         /** @var Model $model */
-        if (! ObserverTracker::hasObserver($model, HotificationObserver::class))
-        {
+        if (! ObserverTracker::hasObserver($model, HotificationObserver::class)) {
             $model::observe(HotificationObserver::class);
             ObserverTracker::addObserver($model, HotificationObserver::class);
         }
+
         return $this;
     }
 
     public function getNotifications(): array
     {
-        $configuredNotifications = config('hotification.models', []);
+        $modelsConfigClass = config('hotification.models');
+        $modelObject = new $modelsConfigClass;
+        $configuredNotifications = $modelObject->observers() ?? [];
+
         return array_merge_recursive($configuredNotifications, self::$dynamicNotifications);
     }
 }

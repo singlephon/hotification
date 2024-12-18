@@ -15,21 +15,75 @@ class Installer extends Command
     {
         $this->info('Installing Hotification...');
 
+        $this->publishConfigurationFile();
+
+        $this->createHotificationDirectory();
+
+        $this->info('Hotification installation complete.');
+    }
+
+    private function publishConfigurationFile(): void
+    {
         $this->info('Publishing configuration...');
 
         if (! $this->configExists()) {
             $this->publishConfiguration();
-            $this->info('Published configuration');
+            $this->info('Configuration file published.');
         } else {
             if ($this->shouldOverwriteConfig()) {
                 $this->info('Overwriting configuration file...');
-                $this->publishConfiguration($force = true);
+                $this->publishConfiguration(true);
             } else {
-                $this->info('Existing configuration was not overwritten');
+                $this->info('Existing configuration file was not overwritten.');
             }
         }
+    }
 
-        $this->info('Installed Hotification');
+    private function createHotificationDirectory(): void
+    {
+        $targetPath = app_path('Hotification');
+
+        $this->info('Creating Hotification directory in app/...');
+
+        if (File::exists($targetPath) && $this->hasRequiredFiles($targetPath)) {
+            $this->info('Hotification directory and required files already exist. Skipping creation.');
+
+            return;
+        }
+
+        if (! File::exists($targetPath)) {
+            File::makeDirectory($targetPath, 0755, true);
+            $this->info('Hotification directory created.');
+        }
+
+        $this->copyObservers($targetPath);
+    }
+
+    private function copyObservers(string $targetPath): void
+    {
+        $filesToCopy = [
+            'observers/models.stub' => 'Models.php',
+            'observers/scheduled.stub' => 'Schedules.php',
+        ];
+
+        foreach ($filesToCopy as $source => $destination) {
+            $destinationPath = $targetPath.'/'.$destination;
+
+            if (File::exists($destinationPath)) {
+                $this->info("File $destination already exists. Skipping.");
+
+                continue;
+            }
+
+            $sourcePath = __DIR__.'/../../'.$source;
+
+            if (File::exists($sourcePath)) {
+                File::copy($sourcePath, $destinationPath);
+                $this->info("Copied $source to $destinationPath.");
+            } else {
+                $this->warn("Source file $sourcePath does not exist.");
+            }
+        }
     }
 
     private function configExists(): bool
@@ -37,22 +91,32 @@ class Installer extends Command
         return File::exists(config_path('hotification.php'));
     }
 
-    private function shouldOverwriteConfig(): bool
+    private function hasRequiredFiles(string $directory): bool
     {
-        return $this->confirm(
-            'Config file already exists. Do you want to overwrite it?',
-            false
-        );
+        $requiredFiles = ['Model.php', 'Schedule.php'];
+
+        foreach ($requiredFiles as $file) {
+            if (! File::exists($directory.'/'.$file)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    private function publishConfiguration($forcePublish = false)
+    private function shouldOverwriteConfig(): bool
+    {
+        return $this->confirm('Config file already exists. Do you want to overwrite it?', false);
+    }
+
+    private function publishConfiguration(bool $forcePublish = false): void
     {
         $params = [
             '--provider' => "Singlephon\Hotification\HotificationServiceProvider",
-            '--tag' => "config"
+            '--tag' => 'config',
         ];
 
-        if ($forcePublish === true) {
+        if ($forcePublish) {
             $params['--force'] = true;
         }
 

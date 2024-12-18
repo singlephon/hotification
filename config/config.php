@@ -1,7 +1,5 @@
 <?php
 
-use Singlephon\Hotification\Hotification;
-
 return [
     'extras' => [
         /**
@@ -21,10 +19,6 @@ return [
         'hotification_sender' => \Singlephon\Hotification\Extras\HotificationSender::class,
     ],
 
-    'models' => [
-        # ...
-    ],
-    'scheduled_notifications' => [
-        # ...
-    ],
+    'models' => \App\Hotification\Models::class,
+    'scheduled_notifications' => \App\Hotification\Schedules::class,
 ];

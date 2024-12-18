@@ -1,0 +1,11 @@
+<?php
+
+namespace App\Hotification;
+
+class Models
+{
+    public function observers(): array
+    {
+        return [];
+    }
+}

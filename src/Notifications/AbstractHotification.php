@@ -10,8 +10,6 @@ abstract class AbstractHotification extends Notification
 {
     /**
      * List of recievers
-     *
-     * @return Model|Collection|array
      */
     abstract public function receivers(): Model|array|Collection;
 }

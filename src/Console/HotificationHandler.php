@@ -38,25 +38,26 @@ class HotificationHandler extends Command
         $this->clear_all();
     }
 
-
     /**
      * Send unread notifications through email
+     *
      * @return void
      */
     public function email()
     {
-        if (! $this->option('email'))
+        if (! $this->option('email')) {
             return;
+        }
     }
 
     /**
-     *
      * @return void
      */
     public function notify()
     {
-        if (! $this->option('notify'))
+        if (! $this->option('notify')) {
             return;
+        }
     }
 
     /**
@@ -64,24 +65,27 @@ class HotificationHandler extends Command
      */
     public function summarize()
     {
-        if (! $this->option('summarize'))
+        if (! $this->option('summarize')) {
             return;
+        }
     }
 
     public function prune()
     {
-        if (! $this->option('prune'))
+        if (! $this->option('prune')) {
             return;
+        }
 
         $this->call('model:prune', [
-            '--model' => 'Singlephon\Hotification\Models\DatabaseNotification'
+            '--model' => 'Singlephon\Hotification\Models\DatabaseNotification',
         ]);
     }
 
     public function clear_all(): void
     {
-        if (! $this->option('clear'))
+        if (! $this->option('clear')) {
             return;
+        }
 
         Notification::query()
             ->delete();

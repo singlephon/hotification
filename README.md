@@ -23,9 +23,9 @@ composer require singlephon/hotification
 php artisan hotification:install
 ```
 
-2. Register the service provider, alias:
+2. Register the service provider and alias:
 
-Add the provider, alias to the `config/app.php`:
+Add the following to `config/app.php`:
 
 ```php
 'providers' => [
@@ -59,20 +59,29 @@ use App\Models\User;
 
 This will add a record to the `notifications` table.
 
-### Automating Notification Sending
+### Automating Notification Sending with Observers
 
-In `Hotification`, you can use model observers to automatically perform actions on specific events, such as creating, updating, or deleting a model instance. This allows for easy integration of notifications and callbacks into standard model workflows, providing a convenient way to manage application behavior.
+Define observers and scheduled notifications directly in `App\Hotification\Models` and `App\Hotification\Schedules` classes.
 
-Key settings in `config/hotification.php`:
+
+#### Example: Configuring Observers
+
+The example below demonstrates how to define observers for models in the `App\Hotification\Models` class:
 
 ```php
-'models' => [
-    # Models for which observers need to be registered
-],
-'scheduled_notifications' => [
-    # Settings for scheduled notifications
-]
+namespace App\Hotification;
 
+use Hotification;
+
+class Models
+{
+    public function observers(): array
+    {
+        return [
+            # ... 
+        ];
+    }
+}
 ```
 
 ### Using Observers for Models
@@ -80,8 +89,7 @@ Key settings in `config/hotification.php`:
 The example below shows how to configure observers for the `Post` and `User` models using hooks like `onCreated`, `onUpdated`, and `onDeleted`:
 
 ```php
-'models' => [
-
+return [
     \App\Models\Post::class => [
         # Send a notification when a new post is created
         'onCreated' => [
@@ -140,36 +148,47 @@ The example below shows how to configure observers for the `Post` and `User` mod
 - **Avoid overloading a single hook** with too many actions to maintain performance and ease of debugging.
 - For complex logic, consider moving it into separate services or classes to maintain clean and readable code.
 
-### Scheduled Notifications
+#### Using Scheduled Notifications
 
-The `scheduled_notifications` section in `config/hotification.php` allows you to define tasks that should be performed on a schedule. These tasks can include sending notifications and executing custom logic using callbacks. This functionality provides flexibility and convenience in managing scheduled tasks, simplifying the automation of routine operations.
+Scheduled notifications are defined in the `App\Hotification\Schedules` class. You can specify tasks to be performed on a schedule, such as sending notifications or executing custom logic.
+
+#### Example: Configuring Scheduled Notifications
 
 ```php
-'scheduled_notifications' => [
-    'weekly_report' => function (Schedule $schedule) {
-        $schedule->call(function () {
-            (new Hotification())
-                ->notify(User::all())
-                ->icon('check-badge')
-                ->title('Welcome ' . $user->name)
-                ->description('Please continue registration form...')
-                ->url('/app/registration/continue')
-                ->actionable()
-                ->send();
-        })->everyWeek(); # Runs every week
-    },
-],
-'daily_report' => [
-    'events' => [
-        \App\Notifications\DailyReportNotification::class, # Sending a notification
-        function () {
-            # Logic for executing a custom action
-            # For example, generating a report and sending it via email
-        },
-    ],
-    'schedule' => '0 0 * * *', # Every day at midnight
-],
+namespace App\Hotification;
 
+use Notification;
+
+class Schedules
+{
+    public function setup(): array
+    {
+        return [
+            'weekly_report' => function (Schedule $schedule) {
+                $schedule->call(function () {
+                    (new Hotification())
+                        ->notify(User::all())
+                        ->icon('check-badge')
+                        ->title('Welcome ' . $user->name)
+                        ->description('Please continue registration form...')
+                        ->url('/app/registration/continue')
+                        ->actionable()
+                        ->send();
+                })->everyWeek(); # Runs every week
+            },
+            'daily_report' => [
+                'events' => [
+                    \App\Notifications\DailyReportNotification::class, # Sending a notification
+                    function () {
+                        # Logic for executing a custom action
+                        # For example, generating a report and sending it via email
+                    },
+                ],
+                'schedule' => '0 0 * * *', # Every day at midnight
+            ]
+        ]
+    }
+}
 ```
 
 ⚠️ Note: Notification classes must extend the `Singlephon\Hotification\Notifications\AbstractHotification` class.
@@ -204,8 +223,6 @@ Consider the following example, which dynamically adds an observer for the `User
     );
 
 ```
-
-The documentation also available in [russian language](README_RU.md)
 
 ### Changelog
 
